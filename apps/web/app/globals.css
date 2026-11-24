@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -21,30 +23,71 @@ body {
   background: var(--background);
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.imgDark {
-  display: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+/* 🎯 Print Styles - Create a clean PDF report */
+@media print {
+  /* Hide everything by default */
+  body * {
+    visibility: hidden;
   }
-
-  .imgLight {
-    display: none;
+  
+  /* Show only the dashboard container and its children */
+  .print-only,
+  .print-only * {
+    visibility: visible;
   }
-  .imgDark {
-    display: unset;
+  
+  /* Position the dashboard at the top */
+  .print-only {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
+  /* Hide specific elements */
+  nav,
+  .no-print,
+  button,
+  input,
+  form,
+  .bg-slate-800\/50,
+  .backdrop-blur-sm {
+    display: none !important;
+  }
+  
+  /* Style the table for printing */
+  .overflow-x-auto {
+    background: white !important;
+    color: black !important;
+    overflow: visible !important;
+  }
+  
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    background: white !important;
+  }
+  
+  th, td {
+    border: 1px solid #ddd !important;
+    padding: 8px !important;
+    text-align: left !important;
+    color: black !important;
+  }
+  
+  th {
+    background: #f5f5f5 !important;
+    font-weight: bold !important;
+  }
+  
+  /* Make sure text is readable */
+  h1, h2, h3, p, span, div {
+    color: black !important;
+  }
+  
+  /* Page margins */
+  @page {
+    margin: 2cm;
+    size: landscape;
   }
 }

@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+// packages/db/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- ENUMS ---
+
+enum Role {
+  BUYER
+  MANAGER
+}
+
+enum RequestStatus {
+  DRAFT
+  OPEN
+  CLOSED
+}
+
+enum QuoteStatus {
+  UPLOADED
+  EXTRACTING
+  EXTRACTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+// --- MODELS ---
+
+model Organization {
+  id                 String   @id @default(cuid())
+  name               String
+  stripeCustomerId   String?  @unique @map("stripe_customer_id")
+  subscriptionStatus String?  @map("subscription_status")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  users               User[]
+ 
+
+  @@map("organizations")
+}
+
+model User {
+  id      String       @id @default(cuid())
+  clerkId String       @unique @map("clerk_id")
+  role    Role         @default(BUYER)
+  orgId   String       @map("org_id")
+  org     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model ProcurementRequest {
+  id     String        @id @default(cuid())
+  title  String
+  status RequestStatus @default(DRAFT)
+  orgId  String        @map("org_id")
+  
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  vendorQuotes VendorQuote[]
+
+  @@map("procurement_requests")
+}
+
+model VendorQuote {
+  id             String @id @default(cuid())
+  organizationId String @default("org_dummy_123")
+  vendorName     String
+  totalPrice     Float
+  currency       String @default("USD")
+  rawFileUrl     String
+  status         String @default("PENDING")
+  lineItems      Json
+  aiInsights     Json?
+
+  procurementRequestId String?
+  procurementRequest   ProcurementRequest? @relation(fields: [procurementRequestId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
